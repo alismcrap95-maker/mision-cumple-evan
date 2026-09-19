@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Misión Cumpleaños - Evan David</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;500;800&family=Limelight&display=swap" rel="stylesheet">
     <style>
         .font-mystery { font-family: 'Limelight', cursive, serif; }
@@ -25,6 +24,7 @@
             margin: 0 auto;
             position: relative;
             overflow: hidden;
+            transition: transform 0.1s;
         }
         @media (min-width: 480px) {
             .invitation-container {
@@ -61,23 +61,75 @@
 
         @keyframes scan { 0% { transform: translateY(-100%); } 100% { transform: translateY(400%); } }
 
-        .rsvp-input {
-            width: 100%;
-            background: #1f2937;
-            border: 1px solid #374151;
-            color: #f3f4f6;
-            border-radius: 0.75rem;
-            padding: 0.75rem 1rem;
-            font-size: 1rem;
-            outline: none;
+        /* ANIMACIONES DE EXPLOSIÓN */
+        @keyframes screenShake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-3px, -4px) rotate(-1deg); }
+            20% { transform: translate(-5px, 0px) rotate(1deg); }
+            30% { transform: translate(5px, 4px) rotate(0deg); }
+            40% { transform: translate(2px, -3px) rotate(1deg); }
+            50% { transform: translate(-3px, 4px) rotate(-1deg); }
+            60% { transform: translate(-5px, 2px) rotate(0deg); }
+            70% { transform: translate(5px, 2px) rotate(-1deg); }
+            80% { transform: translate(-3px, -3px) rotate(1deg); }
+            90% { transform: translate(3px, 4px) rotate(0deg); }
+            100% { transform: translate(2px, -4px) rotate(-1deg); }
         }
-        .rsvp-input:focus { border-color: #ec4899; }
-        .rsvp-input::placeholder { color: #6b7280; }
+        .is-shaking {
+            animation: screenShake 0.4s infinite;
+        }
+
+        @keyframes flashBang {
+            0% { background-color: transparent; }
+            10% { background-color: #ffffff; }
+            25% { background-color: #ff8800; }
+            40% { background-color: #ff0000; }
+            100% { background-color: #000000; }
+        }
+        .explode-effect {
+            display: flex !important;
+            animation: flashBang 1.5s forwards;
+        }
+
+        /* DISEÑO DE LA MECHA */
+        .fuse-container {
+            /* Textura de cuerda color café/naranja */
+            background: repeating-linear-gradient(45deg, #b45309, #b45309 4px, #92400e 4px, #92400e 8px);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.6);
+            border: 1px solid #78350f;
+        }
+        .fuse-burnt {
+            /* Ceniza negra */
+            background-color: #111827; 
+        }
+        .spark {
+            width: 24px;
+            height: 24px;
+            /* Efecto de fuego */
+            background: radial-gradient(circle, #ffffff 10%, #ffea00 30%, #ff5e00 60%, transparent 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 15px #ff5e00, 0 0 25px #ff0000;
+            animation: sparkFlicker 0.1s infinite alternate;
+            pointer-events: none;
+        }
+        @keyframes sparkFlicker {
+            0% { transform: scale(0.8) translate(1px, -1px); opacity: 0.9; }
+            100% { transform: scale(1.3) translate(-1px, 1px); opacity: 1; filter: brightness(1.3); }
+        }
     </style>
 </head>
 <body class="font-body text-gray-200">
 
-    <div class="invitation-container bg-noir relative">
+    <!-- REPRODUCTOR DE AUDIO -->
+    <audio id="misionAudio" src="cancion.mp3" loop preload="auto"></audio>
+
+    <div class="invitation-container bg-noir relative" id="mainContainer">
+        
+        <!-- PANTALLA DE DESTRUCCIÓN SUPERPUESTA -->
+        <div id="explosionOverlay" class="absolute inset-0 z-[100] hidden flex-col items-center justify-center pointer-events-none">
+            <p id="destructText" class="font-bold-title text-4xl text-white tracking-widest opacity-0 transition-opacity duration-1000 mt-10">MENSAJE DESTRUIDO</p>
+        </div>
+
         <canvas id="pawsCanvas" class="absolute inset-0 z-0"></canvas>
 
         <!-- PANTALLA DE INICIO -->
@@ -86,13 +138,15 @@
                 <div class="w-0 h-0 border-t-[18px] border-t-transparent border-l-[30px] border-l-pink-500 border-b-[18px] border-b-transparent ml-3"></div>
             </div>
             <h2 class="font-bold-title text-3xl text-white tracking-widest">INICIAR MISIÓN</h2>
-            <!-- CORRECCIÓN: Nivel 6 -->
             <p class="text-sm text-gray-400 mt-2 font-light tracking-widest">ENCRIPTACIÓN NIVEL 6</p>
         </div>
 
-        <!-- BARRA DE PROGRESO -->
-        <div id="progressBarContainer" class="absolute bottom-4 left-4 right-4 h-1 bg-gray-700 rounded-full z-40 hidden">
-            <div id="progressBar" class="h-full bg-pink-500 rounded-full w-0 transition-all duration-[1000ms] ease-linear"></div>
+        <!-- BARRA DE PROGRESO (LA MECHA) -->
+        <div id="progressBarContainer" class="absolute bottom-6 left-6 right-6 h-2 rounded-full z-40 hidden fuse-container">
+            <!-- Ceniza y chispa -->
+            <div id="progressBar" class="h-full rounded-l-full fuse-burnt w-0 transition-all duration-[100ms] ease-linear relative">
+                <div class="spark absolute -right-3 -top-[8px]"></div>
+            </div>
         </div>
 
         <!-- ESCENA 1: Intro -->
@@ -104,24 +158,25 @@
             </div>
         </div>
 
-        <!-- ESCENA 2: Nombre -->
+        <!-- ESCENA 2: Nombre y Foto -->
         <div id="scene2" class="scene">
             <div class="slow-zoom">
-                <h1 class="font-bold-title fs-title text-white mb-2 leading-tight">
-                    AGENTE <span class="text-pink-panther">EVAN DAVID</span><br>
-                    <span class="text-white text-2xl">DÍAZ PATIÑO</span>
+                <!-- NOMBRE EN UN SOLO TONO -->
+                <h1 class="font-bold-title text-white mb-2 leading-tight flex flex-col gap-1">
+                    <span class="text-xl md:text-2xl text-gray-300">AGENTE</span>
+                    <span class="text-pink-panther fs-title block leading-none">EVAN DAVID DÍAZ PATIÑO</span>
                 </h1>
 
-                <div class="relative mt-4 mb-4 transform -rotate-2 bg-gray-800/60 px-6 py-8 border border-pink-500/30 rounded-xl">
-                    <svg class="w-20 h-20 mx-auto text-pink-500 opacity-80" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a5 5 0 00-5 5v2a5 5 0 0010 0V7a5 5 0 00-5-5zm0 12c-4 0-8 2-8 5v1h16v-1c0-3-4-5-8-5z"/></svg>
-                    <div class="absolute -bottom-2 -right-2 transform -rotate-12 border-4 border-red-600 text-red-600 font-bold-title text-lg px-2 py-1 rounded shadow-md opacity-90 bg-black/60">
+                <!-- CONTENEDOR DE LA FOTO -->
+                <div class="relative mt-4 mb-4 transform -rotate-2 bg-gray-800/60 p-2 border border-pink-500/30 rounded-xl">
+                    <img src="foto_evan.jpg" alt="Foto del Agente" class="w-32 h-32 object-cover rounded-lg border-2 border-pink-500 shadow-[0_0_15px_rgba(236,72,153,0.4)] grayscale opacity-90 transition-all duration-1000" id="agenteFoto">
+                    <div class="absolute -bottom-2 -right-4 transform -rotate-12 border-4 border-red-600 text-red-600 font-bold-title text-lg px-2 py-1 rounded shadow-md opacity-90 bg-black/80">
                         CONFIDENCIAL
                     </div>
                 </div>
 
-                <div class="bg-gray-800 border-l-4 border-pink-500 px-4 py-2 inline-block shadow-lg">
+                <div class="bg-gray-800 border-l-4 border-pink-500 px-4 py-2 inline-block shadow-lg mt-2">
                     <p class="text-sm md:text-base font-medium text-gray-300">Ha completado con éxito su</p>
-                    <!-- CORRECCIÓN: Misión Número 6 -->
                     <p class="font-bold-title fs-subtitle text-pink-panther mt-1">MISIÓN NÚMERO 6</p>
                 </div>
             </div>
@@ -154,141 +209,68 @@
             </div>
         </div>
 
-        <!-- ESCENA 5: Dirección + Google Maps -->
+        <!-- ESCENA 5: Dirección -->
         <div id="scene5" class="scene">
             <div class="slow-zoom">
                 <p class="font-mystery fs-mystery text-pink-panther mb-8">Coordenadas de la Base</p>
-
                 <div class="bg-gray-900 p-5 md:p-6 rounded-xl border border-pink-500/30 relative overflow-hidden">
                     <div class="absolute inset-0 bg-gradient-to-b from-transparent via-pink-500/10 to-transparent h-20 -translate-y-20 animate-[scan_3s_ease-in-out_infinite]"></div>
-
                     <svg class="w-10 h-10 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-
                     <p class="font-bold fs-subtitle text-white tracking-wide">CARRERA 13</p>
                     <p class="font-bold fs-subtitle text-white tracking-wide"># 32F - 19 SUR</p>
                     <p class="text-xs text-gray-500 mt-1">Bogotá D.C.</p>
                 </div>
-
-                <a href="https://www.google.com/maps/search/?api=1&query=Carrera+13+%2332F-19+Sur%2C+Bogot%C3%A1%2C+Colombia"
-                   target="_blank" rel="noopener noreferrer"
-                   class="mt-6 inline-flex items-center gap-2 bg-pink-600 hover:bg-pink-500 transition-colors text-white font-bold-title tracking-wide px-6 py-3 rounded-full shadow-lg">
+                <a href="https://www.google.com/maps/search/?api=1&query=Carrera+13+%2332F-19+Sur%2C+Bogot%C3%A1%2C+Colombia" target="_blank" rel="noopener noreferrer" class="mt-6 inline-flex items-center gap-2 bg-pink-600 hover:bg-pink-500 transition-colors text-white font-bold-title tracking-wide px-6 py-3 rounded-full shadow-lg">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
                     VER EN GOOGLE MAPS
                 </a>
             </div>
         </div>
 
-        <!-- ESCENA 6: Confirmación de asistencia (RSVP) -->
+        <!-- ESCENA 6: Confirmación (Google Forms) -->
         <div id="scene6" class="scene">
             <div class="slow-zoom w-full">
                 <p class="font-mystery fs-mystery text-pink-panther mb-2">Confirma tu Misión</p>
-                <p class="text-sm text-gray-400 mb-6">Responde antes del 1 de noviembre</p>
+                <p class="text-sm text-gray-300 mb-8 px-4">Serás redirigido a los servidores seguros de la agencia.</p>
 
-                <form id="rsvpForm" class="w-full flex flex-col gap-3 max-w-xs mx-auto text-left">
-                    <div>
-                        <label class="text-xs text-gray-400 block mb-1">Tu nombre</label>
-                        <input required type="text" id="guestName" class="rsvp-input" placeholder="Nombre completo">
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-400 block mb-1">¿Asistirás?</label>
-                        <select id="guestAttending" class="rsvp-input">
-                            <option value="Sí, confirmo mi asistencia">Sí, asistiré 🎉</option>
-                            <option value="No podré asistir">No podré asistir</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-400 block mb-1">N° de acompañantes (además de ti)</label>
-                        <input type="number" id="guestCount" min="0" value="0" class="rsvp-input">
-                    </div>
-                    <div>
-                        <label class="text-xs text-gray-400 block mb-1">Mensaje para el agente (opcional)</label>
-                        <input type="text" id="guestMessage" class="rsvp-input" placeholder="¡Nos vemos ahí!">
-                    </div>
+                <!-- REEMPLAZA ESTE ENLACE CON EL DE TU GOOGLE FORM -->
+                <a href="AQUI_PEGA_EL_LINK_DE_TU_GOOGLE_FORM" 
+                   target="_blank" rel="noopener noreferrer"
+                   id="btnAbrirForm"
+                   class="inline-block bg-pink-600 hover:bg-pink-500 transition-colors text-white font-bold-title tracking-widest px-8 py-4 rounded-full shadow-[0_0_20px_rgba(236,72,153,0.5)]">
+                    ABRIR FORMULARIO OFICIAL
+                </a>
 
-                    <button type="submit"
-                            class="mt-3 bg-pink-600 hover:bg-pink-500 transition-colors text-white font-bold-title tracking-widest px-6 py-3 rounded-full shadow-lg">
-                        ENVIAR CONFIRMACIÓN
+                <div class="mt-12">
+                    <p class="text-xs text-gray-500 mb-3">¿Ya llenaste el formulario?</p>
+                    <button id="btnFinalizar" class="px-6 py-2 rounded-full border border-gray-600 text-gray-400 text-sm tracking-widest hover:border-pink-500 hover:text-pink-400 transition-colors">
+                        SÍ, YA CONFIRMÉ
                     </button>
-                </form>
-
-                <p id="rsvpNote" class="text-xs text-gray-500 mt-4">Se abrirá tu app de correo para enviar la confirmación.</p>
+                </div>
             </div>
         </div>
 
-        <!-- ESCENA 7: Despedida -->
+        <!-- ESCENA 7: Despedida y Autodestrucción -->
         <div id="scene7" class="scene">
             <div class="slow-zoom">
                 <h2 class="font-bold-title fs-title text-pink-panther mb-4">¡NO FALTES!</h2>
                 <p class="fs-body font-light text-gray-300">Ven con tu mejor actitud de detective.</p>
-                <div class="mt-8 opacity-50">
-                    <svg class="w-12 h-12 mx-auto text-pink-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+                
+                <div class="mt-12 flex flex-col items-center justify-center">
+                    <button id="btnExplode" class="bg-red-700 hover:bg-red-600 transition-colors text-white font-bold-title tracking-widest px-6 py-3 rounded-full shadow-[0_0_25px_rgba(220,38,38,0.7)] animate-pulse border-2 border-red-400">
+                        AUTODESTRUIR MENSAJE
+                    </button>
+                    <p id="countdownText" class="text-red-500 font-bold-title text-4xl mt-4 hidden drop-shadow-[0_0_10px_rgba(255,0,0,0.8)]"></p>
                 </div>
-                <p class="text-xs text-gray-500 mt-8">Fin de la transmisión.</p>
-                <button id="replayBtn" class="mt-6 px-5 py-2 rounded-full border border-pink-500 text-pink-400 text-sm tracking-widest hover:bg-pink-500 hover:text-white transition-colors">
-                    VER DE NUEVO
-                </button>
+                
+                <p class="text-xs text-gray-500 mt-12">Fin de la transmisión.</p>
             </div>
         </div>
 
     </div>
 
     <script>
-        const PARENT_EMAIL = "diaztorreschristiandavid@gmail.com";
-
-        // ---------- AUDIO: TEMA DE MISIÓN IMPOSIBLE ----------
-        let bassSeq, melodySeq;
-
-        async function playMissionImpossibleTheme() {
-            await Tone.start();
-            Tone.Transport.bpm.value = 160;
-
-            const bassSynth = new Tone.Synth({
-                oscillator: { type: "triangle" },
-                envelope: { attack: 0.01, decay: 0.15, sustain: 0.05, release: 0.2 }
-            }).toDestination();
-            bassSynth.volume.value = -3;
-
-            const melodySynth = new Tone.Synth({
-                oscillator: { type: "square" },
-                envelope: { attack: 0.01, decay: 0.1, sustain: 0.15, release: 0.3 }
-            }).toDestination();
-            melodySynth.volume.value = -9;
-
-            const bassNotes = [
-                "G2", null, null, "G2", null, null, "Bb2", null, "C3", null,
-                "G2", null, null, "G2", null, null, "F2", null, "F#2", null
-            ];
-
-            const melodyNotes = [
-                null, null, null, null, null, null, null, null, null, null,
-                null, null, null, null, null, null, null, null, null, null,
-                "G4", null, null, null, null, null, "Bb4", null, "D5", null,
-                "G4", null, null, null, null, null, "Bb4", null, "Db5", null
-            ];
-
-            bassSeq = new Tone.Sequence((time, note) => {
-                if (note) bassSynth.triggerAttackRelease(note, "16n", time);
-            }, bassNotes, "16n");
-            bassSeq.loop = true;
-
-            melodySeq = new Tone.Sequence((time, note) => {
-                if (note) melodySynth.triggerAttackRelease(note, note === "G4" ? "8n" : "16n", time);
-            }, melodyNotes, "16n");
-            melodySeq.loop = true;
-
-            bassSeq.start(0);
-            melodySeq.start(0);
-            Tone.Transport.start();
-        }
-
-        function stopMissionImpossibleTheme() {
-            try {
-                if (bassSeq) bassSeq.stop();
-                if (melodySeq) melodySeq.stop();
-                Tone.Transport.stop();
-                Tone.Transport.cancel();
-            } catch (e) { /* noop */ }
-        }
+        const audioEl = document.getElementById('misionAudio');
 
         // ---------- CANVAS: HUELLAS DE FONDO ----------
         const canvas = document.getElementById('pawsCanvas');
@@ -337,18 +319,12 @@
                 lastX = Math.random() * canvas.width;
             }
 
-            paws.push({
-                x: lastX, y: lastY,
-                rotation: isLeftFoot ? -0.2 : 0.2,
-                scale: Math.random() * 0.4 + 0.8,
-                opacity: 0, life: 0, maxLife: 200
-            });
+            paws.push({ x: lastX, y: lastY, rotation: isLeftFoot ? -0.2 : 0.2, scale: Math.random() * 0.4 + 0.8, opacity: 0, life: 0, maxLife: 200 });
             isLeftFoot = !isLeftFoot;
         }
 
         function animateCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-
             ctx.fillStyle = 'rgba(255,255,255,0.02)';
             for (let i = 0; i < 30; i++) {
                 ctx.beginPath();
@@ -364,17 +340,15 @@
 
                 let currentOpacity = Math.max(0, Math.min(p.opacity, 0.15));
                 if (currentOpacity > 0) drawPaw(p.x, p.y, p.rotation, p.scale, currentOpacity);
-
                 if (p.life >= p.maxLife) paws.splice(i, 1);
             }
-
             animationFrameId = requestAnimationFrame(animateCanvas);
         }
 
         // ---------- TIMELINE ----------
         const AUTO_TIMELINE = [
             { time: 0,     scene: 'scene1' },
-            { time: 9000,  scene: 'scene2' },
+            { time: 9000,  scene: 'scene2', action: () => document.getElementById('agenteFoto').classList.remove('grayscale') },
             { time: 22000, scene: 'scene3' },
             { time: 34000, scene: 'scene4' },
             { time: 46000, scene: 'scene5' },
@@ -396,15 +370,24 @@
             clearInterval(videoInterval);
             clearInterval(footprintInterval);
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
-            stopMissionImpossibleTheme();
+            
+            audioEl.pause();
+            audioEl.currentTime = 0;
 
             paws = [];
             currentActiveScene = null;
             document.querySelectorAll('.scene').forEach(el => el.classList.remove('active'));
-            document.getElementById('rsvpForm').reset();
+            document.getElementById('agenteFoto').classList.add('grayscale');
 
             document.getElementById('progressBar').style.width = '0%';
             document.getElementById('progressBarContainer').classList.add('hidden');
+            
+            // Reset Explosion UI
+            document.getElementById('btnExplode').style.display = 'inline-block';
+            document.getElementById('countdownText').style.display = 'none';
+            document.getElementById('explosionOverlay').classList.add('hidden');
+            document.getElementById('explosionOverlay').classList.remove('explode-effect');
+            document.getElementById('destructText').style.opacity = '0';
 
             const startScreen = document.getElementById('startScreen');
             startScreen.style.display = 'flex';
@@ -416,9 +399,7 @@
             startScreen.style.opacity = '0';
             setTimeout(() => { startScreen.style.display = 'none'; }, 1000);
 
-            playMissionImpossibleTheme().catch(() => {
-                console.warn("El audio no pudo iniciarse en este navegador.");
-            });
+            audioEl.play().catch(e => console.log("El navegador bloqueó el autoplay del audio."));
 
             const progressContainer = document.getElementById('progressBarContainer');
             progressContainer.classList.remove('hidden');
@@ -433,56 +414,69 @@
 
             videoInterval = setInterval(() => {
                 let elapsed = Date.now() - startTime;
-
                 let progressPercent = Math.min((elapsed / RSVP_TIME) * 100, 100);
                 progressBar.style.width = progressPercent + '%';
 
                 let activeConfig = [...AUTO_TIMELINE].reverse().find(t => elapsed >= t.time);
                 if (activeConfig && currentActiveScene !== activeConfig.scene) {
                     showScene(activeConfig.scene);
+                    if (activeConfig.action) activeConfig.action();
                 }
 
                 if (elapsed >= RSVP_TIME) {
-                    clearInterval(videoInterval);
+                    clearInterval(videoInterval); 
                 }
             }, 100);
         }
 
-        function buildMailto() {
-            const name = document.getElementById('guestName').value || "(sin nombre)";
-            const attending = document.getElementById('guestAttending').value;
-            const count = document.getElementById('guestCount').value || "0";
-            const message = document.getElementById('guestMessage').value || "(sin mensaje)";
-
-            const subject = `Confirmación cumpleaños Evan David - ${name}`;
-            const body =
-                `Nombre: ${name}\n` +
-                `Respuesta: ${attending}\n` +
-                `Acompañantes adicionales: ${count}\n` +
-                `Mensaje: ${message}\n\n` +
-                // CORRECCIÓN: 6 años en lugar de 9
-                `Evento: Cumpleaños de Evan David Díaz Patiño (6 años)\n` +
-                `Fecha de celebración: 8 de noviembre de 2026, 2:00 PM\n` +
-                `Lugar: Carrera 13 # 32F - 19 Sur, Bogotá`;
-
-            return `mailto:${PARENT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-        }
-
-        document.getElementById('rsvpForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            window.location.href = buildMailto();
-            clearInterval(footprintInterval);
-            if (animationFrameId) cancelAnimationFrame(animationFrameId);
-            stopMissionImpossibleTheme();
+        document.getElementById('btnFinalizar').addEventListener('click', () => {
             document.getElementById('progressBarContainer').classList.add('hidden');
             showScene('scene7');
         });
 
         document.getElementById('startScreen').addEventListener('click', startVideo);
-        document.getElementById('replayBtn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            resetExperience();
+
+        // LÓGICA DE LA EXPLOSIÓN
+        document.getElementById('btnExplode').addEventListener('click', () => {
+            const btn = document.getElementById('btnExplode');
+            const countdown = document.getElementById('countdownText');
+            const mainContainer = document.getElementById('mainContainer');
+            const overlay = document.getElementById('explosionOverlay');
+            const textDestruct = document.getElementById('destructText');
+            
+            btn.style.display = 'none';
+            countdown.style.display = 'block';
+            
+            let time = 3;
+            countdown.innerText = `00:0${time}`;
+            
+            let interval = setInterval(() => {
+                time--;
+                if (time > 0) {
+                    countdown.innerText = `00:0${time}`;
+                    mainContainer.classList.add('is-shaking'); 
+                } else {
+                    clearInterval(interval);
+                    countdown.style.display = 'none';
+                    
+                    // ¡BOOM!
+                    mainContainer.classList.add('is-shaking');
+                    overlay.classList.remove('hidden');
+                    overlay.classList.add('explode-effect');
+                    audioEl.pause(); 
+                    
+                    setTimeout(() => {
+                        mainContainer.classList.remove('is-shaking');
+                        textDestruct.style.opacity = '1';
+                    }, 800);
+                    
+                    setTimeout(() => {
+                        resetExperience();
+                    }, 5000);
+                }
+            }, 1000);
         });
+
     </script>
 </body>
 </html>
