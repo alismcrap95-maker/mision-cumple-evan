@@ -61,7 +61,7 @@
 
         @keyframes scan { 0% { transform: translateY(-100%); } 100% { transform: translateY(400%); } }
 
-        /* ANIMACIONES DE EXPLOSIÓN */
+        /* ANIMACIONES DE EXPLOSIÓN Y VIDRIO ROTO */
         @keyframes screenShake {
             0% { transform: translate(1px, 1px) rotate(0deg); }
             10% { transform: translate(-3px, -4px) rotate(-1deg); }
@@ -91,21 +91,26 @@
             animation: flashBang 1.5s forwards;
         }
 
+        @keyframes shatterGlass {
+            0% { transform: scale(1.5); opacity: 0; }
+            50% { transform: scale(0.95); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-shatter {
+            display: block !important;
+            animation: shatterGlass 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
         /* DISEÑO DE LA MECHA */
         .fuse-container {
-            /* Textura de cuerda color café/naranja */
             background: repeating-linear-gradient(45deg, #b45309, #b45309 4px, #92400e 4px, #92400e 8px);
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.6);
             border: 1px solid #78350f;
         }
-        .fuse-burnt {
-            /* Ceniza negra */
-            background-color: #111827; 
-        }
+        .fuse-burnt { background-color: #111827; }
         .spark {
             width: 24px;
             height: 24px;
-            /* Efecto de fuego */
             background: radial-gradient(circle, #ffffff 10%, #ffea00 30%, #ff5e00 60%, transparent 100%);
             border-radius: 50%;
             box-shadow: 0 0 15px #ff5e00, 0 0 25px #ff0000;
@@ -127,7 +132,24 @@
         
         <!-- PANTALLA DE DESTRUCCIÓN SUPERPUESTA -->
         <div id="explosionOverlay" class="absolute inset-0 z-[100] hidden flex-col items-center justify-center pointer-events-none">
-            <p id="destructText" class="font-bold-title text-4xl text-white tracking-widest opacity-0 transition-opacity duration-1000 mt-10">MENSAJE DESTRUIDO</p>
+            
+            <!-- SVG Vidrio Roto -->
+            <svg id="brokenGlass" class="absolute inset-0 w-full h-full pointer-events-none hidden z-[105]" style="filter: drop-shadow(2px 5px 4px rgba(0,0,0,0.9));" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <g stroke="rgba(255, 255, 255, 0.85)" stroke-width="0.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="50" cy="50" r="1.5" fill="rgba(255,255,255,0.9)"/>
+                    <path d="M50,50 L5,5 M50,50 L85,0 M50,50 L100,45 M50,50 L75,100 M50,50 L20,100 M50,50 L0,60"/>
+                    <path d="M25,25 L40,5 L70,30 L95,15 M80,60 L100,80 L60,85 M35,70 L10,95 M15,45 L0,30"/>
+                    <path d="M40,30 L55,15 M60,60 L85,45 M40,65 L25,85 M25,50 L5,70"/>
+                    <polygon points="50,50 5,5 40,5" fill="rgba(255,255,255,0.15)"/>
+                    <polygon points="50,50 85,0 100,45" fill="rgba(255,255,255,0.2)"/>
+                    <polygon points="50,50 75,100 20,100" fill="rgba(255,255,255,0.1)"/>
+                    <polygon points="50,50 0,60 5,5" fill="rgba(255,255,255,0.25)"/>
+                    <polygon points="40,30 55,15 70,30" fill="rgba(255,255,255,0.12)"/>
+                    <polygon points="25,50 15,45 0,60" fill="rgba(255,255,255,0.18)"/>
+                </g>
+            </svg>
+
+            <p id="destructText" class="font-bold-title text-4xl text-white tracking-widest opacity-0 transition-all duration-1000 mt-10 z-[110] drop-shadow-[0_0_10px_rgba(255,0,0,0.8)] scale-90">MENSAJE DESTRUIDO</p>
         </div>
 
         <canvas id="pawsCanvas" class="absolute inset-0 z-0"></canvas>
@@ -143,7 +165,6 @@
 
         <!-- BARRA DE PROGRESO (LA MECHA) -->
         <div id="progressBarContainer" class="absolute bottom-6 left-6 right-6 h-2 rounded-full z-40 hidden fuse-container">
-            <!-- Ceniza y chispa -->
             <div id="progressBar" class="h-full rounded-l-full fuse-burnt w-0 transition-all duration-[100ms] ease-linear relative">
                 <div class="spark absolute -right-3 -top-[8px]"></div>
             </div>
@@ -234,7 +255,7 @@
                 <p class="text-sm text-gray-300 mb-8 px-4">Serás redirigido a los servidores seguros de la agencia.</p>
 
                 <!-- REEMPLAZA ESTE ENLACE CON EL DE TU GOOGLE FORM -->
-                <a href="AQUI_PEGA_EL_LINK_DE_TU_GOOGLE_FORM" 
+                <a href="https://forms.gle/4EsZdyStt2C2yh2a8" 
                    target="_blank" rel="noopener noreferrer"
                    id="btnAbrirForm"
                    class="inline-block bg-pink-600 hover:bg-pink-500 transition-colors text-white font-bold-title tracking-widest px-8 py-4 rounded-full shadow-[0_0_20px_rgba(236,72,153,0.5)]">
@@ -387,7 +408,14 @@
             document.getElementById('countdownText').style.display = 'none';
             document.getElementById('explosionOverlay').classList.add('hidden');
             document.getElementById('explosionOverlay').classList.remove('explode-effect');
-            document.getElementById('destructText').style.opacity = '0';
+            
+            const brokenGlass = document.getElementById('brokenGlass');
+            brokenGlass.classList.add('hidden');
+            brokenGlass.classList.remove('animate-shatter');
+            
+            const textDestruct = document.getElementById('destructText');
+            textDestruct.style.opacity = '0';
+            textDestruct.style.transform = 'scale(0.9)';
 
             const startScreen = document.getElementById('startScreen');
             startScreen.style.display = 'flex';
@@ -443,6 +471,7 @@
             const mainContainer = document.getElementById('mainContainer');
             const overlay = document.getElementById('explosionOverlay');
             const textDestruct = document.getElementById('destructText');
+            const brokenGlass = document.getElementById('brokenGlass');
             
             btn.style.display = 'none';
             countdown.style.display = 'block';
@@ -465,14 +494,22 @@
                     overlay.classList.add('explode-effect');
                     audioEl.pause(); 
                     
+                    // Mostrar vidrio roto justo cuando el destello alcanza su punto máximo
+                    setTimeout(() => {
+                        brokenGlass.classList.remove('hidden');
+                        brokenGlass.classList.add('animate-shatter');
+                    }, 500);
+
                     setTimeout(() => {
                         mainContainer.classList.remove('is-shaking');
                         textDestruct.style.opacity = '1';
+                        textDestruct.style.transform = 'scale(1)';
                     }, 800);
                     
+                    // Opcional: Reiniciar tras unos segundos
                     setTimeout(() => {
                         resetExperience();
-                    }, 5000);
+                    }, 6000);
                 }
             }, 1000);
         });
