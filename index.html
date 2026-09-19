@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Misión Cumpleaños - Evan David</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;500;800&family=Limelight&display=swap" rel="stylesheet">
+    <style>
+        .font-mystery { font-family: 'Limelight', cursive, serif; }
+        .font-bold-title { font-family: 'Bebas Neue', Impact, sans-serif; letter-spacing: 2px; }
+        .font-body { font-family: 'Montserrat', Arial, sans-serif; }
+
+        html, body { margin: 0; padding: 0; height: 100%; background: #030712; }
+        body { min-height: 100dvh; display: flex; align-items: center; justify-content: center; }
+
+        .bg-noir { background-color: #111827; }
+        .text-pink-panther { color: #ec4899; }
+
+        .invitation-container {
+            width: 100%;
+            height: 100dvh;
+            max-width: 480px;
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+        }
+        @media (min-width: 480px) {
+            .invitation-container {
+                height: min(100dvh, 900px);
+                border-radius: 2rem;
+                border: 6px solid #1f2937;
+                box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+            }
+        }
+
+        .scene {
+            position: absolute; inset: 0;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            padding: clamp(1.25rem, 6vw, 2.5rem);
+            text-align: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 1.5s ease-in-out;
+            overflow-y: auto;
+        }
+        .scene.active { opacity: 1; z-index: 20; pointer-events: auto; }
+
+        .slow-zoom {
+            animation: slowZoom 10s infinite alternate linear;
+            width: 100%; display: flex; flex-direction: column; align-items: center;
+        }
+        @keyframes slowZoom { from { transform: scale(1); } to { transform: scale(1.05); } }
+
+        canvas { filter: blur(1px); }
+
+        .fs-title    { font-size: clamp(1.8rem, 7.5vw, 2.9rem); }
+        .fs-subtitle { font-size: clamp(1.1rem, 5vw, 1.6rem); }
+        .fs-body     { font-size: clamp(0.95rem, 4.2vw, 1.2rem); }
+        .fs-mystery  { font-size: clamp(1.4rem, 6vw, 2rem); }
+
+        @keyframes scan { 0% { transform: translateY(-100%); } 100% { transform: translateY(400%); } }
+
+        .rsvp-input {
+            width: 100%;
+            background: #1f2937;
+            border: 1px solid #374151;
+            color: #f3f4f6;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            outline: none;
+        }
+        .rsvp-input:focus { border-color: #ec4899; }
+        .rsvp-input::placeholder { color: #6b7280; }
+    </style>
+</head>
+<body class="font-body text-gray-200">
+
+    <div class="invitation-container bg-noir relative">
+        <canvas id="pawsCanvas" class="absolute inset-0 z-0"></canvas>
+
+        <!-- PANTALLA DE INICIO -->
+        <div id="startScreen" class="absolute inset-0 z-50 bg-gray-900 flex flex-col items-center justify-center cursor-pointer transition-opacity duration-1000">
+            <div class="w-24 h-24 rounded-full border-4 border-pink-500 flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(236,72,153,0.4)] hover:scale-110 transition-transform bg-gray-800">
+                <div class="w-0 h-0 border-t-[18px] border-t-transparent border-l-[30px] border-l-pink-500 border-b-[18px] border-b-transparent ml-3"></div>
+            </div>
+            <h2 class="font-bold-title text-3xl text-white tracking-widest">INICIAR MISIÓN</h2>
+            <!-- CORRECCIÓN: Nivel 6 -->
+            <p class="text-sm text-gray-400 mt-2 font-light tracking-widest">ENCRIPTACIÓN NIVEL 6</p>
+        </div>
+
+        <!-- BARRA DE PROGRESO -->
+        <div id="progressBarContainer" class="absolute bottom-4 left-4 right-4 h-1 bg-gray-700 rounded-full z-40 hidden">
+            <div id="progressBar" class="h-full bg-pink-500 rounded-full w-0 transition-all duration-[1000ms] ease-linear"></div>
+        </div>
+
+        <!-- ESCENA 1: Intro -->
+        <div id="scene1" class="scene">
+            <div class="slow-zoom">
+                <svg class="w-16 h-16 text-pink-500 mb-6 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                <p class="font-mystery fs-mystery text-pink-panther mb-4 drop-shadow-[0_0_8px_rgba(236,72,153,0.8)]">Top Secret</p>
+                <p class="fs-body font-light leading-relaxed">Un caso misterioso está a punto de resolverse en la ciudad...</p>
+            </div>
+        </div>
+
+        <!-- ESCENA 2: Nombre -->
+        <div id="scene2" class="scene">
+            <div class="slow-zoom">
+                <h1 class="font-bold-title fs-title text-white mb-2 leading-tight">
+                    AGENTE <span class="text-pink-panther">EVAN DAVID</span><br>
+                    <span class="text-white text-2xl">DÍAZ PATIÑO</span>
+                </h1>
+
+                <div class="relative mt-4 mb-4 transform -rotate-2 bg-gray-800/60 px-6 py-8 border border-pink-500/30 rounded-xl">
+                    <svg class="w-20 h-20 mx-auto text-pink-500 opacity-80" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2a5 5 0 00-5 5v2a5 5 0 0010 0V7a5 5 0 00-5-5zm0 12c-4 0-8 2-8 5v1h16v-1c0-3-4-5-8-5z"/></svg>
+                    <div class="absolute -bottom-2 -right-2 transform -rotate-12 border-4 border-red-600 text-red-600 font-bold-title text-lg px-2 py-1 rounded shadow-md opacity-90 bg-black/60">
+                        CONFIDENCIAL
+                    </div>
+                </div>
+
+                <div class="bg-gray-800 border-l-4 border-pink-500 px-4 py-2 inline-block shadow-lg">
+                    <p class="text-sm md:text-base font-medium text-gray-300">Ha completado con éxito su</p>
+                    <!-- CORRECCIÓN: Misión Número 6 -->
+                    <p class="font-bold-title fs-subtitle text-pink-panther mt-1">MISIÓN NÚMERO 6</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ESCENA 3: Fecha real -->
+        <div id="scene3" class="scene">
+            <div class="slow-zoom">
+                <p class="font-mystery fs-mystery text-white mb-6">Los Archivos Indican:</p>
+                <p class="fs-body font-light mb-4 text-gray-300">
+                    El nacimiento oficial del agente fue el<br>
+                    <span class="font-bold fs-subtitle text-pink-400 block mt-2">19 DE OCTUBRE</span>
+                </p>
+                <p class="text-sm md:text-base italic text-gray-400 mt-6 border-t border-gray-700 pt-4">
+                    ...Sin embargo, la gran operación <br>se llevará a cabo en otra fecha.
+                </p>
+            </div>
+        </div>
+
+        <!-- ESCENA 4: Fiesta -->
+        <div id="scene4" class="scene">
+            <div class="slow-zoom bg-gray-800/80 p-6 md:p-8 rounded-2xl border border-gray-700 shadow-2xl w-full">
+                <p class="text-xs md:text-sm uppercase tracking-widest text-pink-500 mb-4">FECHA DE LA OPERACIÓN</p>
+                <p class="font-bold-title fs-title text-white mb-2">8 DE NOVIEMBRE</p>
+                <div class="flex items-center justify-center space-x-2 fs-subtitle font-light text-gray-300 my-4">
+                    <svg class="w-6 h-6 text-pink-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <span>2:00 PM</span>
+                </div>
+                <p class="text-sm text-gray-400 mt-4">Prepárate para la acción.</p>
+            </div>
+        </div>
+
+        <!-- ESCENA 5: Dirección + Google Maps -->
+        <div id="scene5" class="scene">
+            <div class="slow-zoom">
+                <p class="font-mystery fs-mystery text-pink-panther mb-8">Coordenadas de la Base</p>
+
+                <div class="bg-gray-900 p-5 md:p-6 rounded-xl border border-pink-500/30 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-pink-500/10 to-transparent h-20 -translate-y-20 animate-[scan_3s_ease-in-out_infinite]"></div>
+
+                    <svg class="w-10 h-10 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+
+                    <p class="font-bold fs-subtitle text-white tracking-wide">CARRERA 13</p>
+                    <p class="font-bold fs-subtitle text-white tracking-wide"># 32F - 19 SUR</p>
+                    <p class="text-xs text-gray-500 mt-1">Bogotá D.C.</p>
+                </div>
+
+                <a href="https://www.google.com/maps/search/?api=1&query=Carrera+13+%2332F-19+Sur%2C+Bogot%C3%A1%2C+Colombia"
+                   target="_blank" rel="noopener noreferrer"
+                   class="mt-6 inline-flex items-center gap-2 bg-pink-600 hover:bg-pink-500 transition-colors text-white font-bold-title tracking-wide px-6 py-3 rounded-full shadow-lg">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+                    VER EN GOOGLE MAPS
+                </a>
+            </div>
+        </div>
+
+        <!-- ESCENA 6: Confirmación de asistencia (RSVP) -->
+        <div id="scene6" class="scene">
+            <div class="slow-zoom w-full">
+                <p class="font-mystery fs-mystery text-pink-panther mb-2">Confirma tu Misión</p>
+                <p class="text-sm text-gray-400 mb-6">Responde antes del 1 de noviembre</p>
+
+                <form id="rsvpForm" class="w-full flex flex-col gap-3 max-w-xs mx-auto text-left">
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-1">Tu nombre</label>
+                        <input required type="text" id="guestName" class="rsvp-input" placeholder="Nombre completo">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-1">¿Asistirás?</label>
+                        <select id="guestAttending" class="rsvp-input">
+                            <option value="Sí, confirmo mi asistencia">Sí, asistiré 🎉</option>
+                            <option value="No podré asistir">No podré asistir</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-1">N° de acompañantes (además de ti)</label>
+                        <input type="number" id="guestCount" min="0" value="0" class="rsvp-input">
+                    </div>
+                    <div>
+                        <label class="text-xs text-gray-400 block mb-1">Mensaje para el agente (opcional)</label>
+                        <input type="text" id="guestMessage" class="rsvp-input" placeholder="¡Nos vemos ahí!">
+                    </div>
+
+                    <button type="submit"
+                            class="mt-3 bg-pink-600 hover:bg-pink-500 transition-colors text-white font-bold-title tracking-widest px-6 py-3 rounded-full shadow-lg">
+                        ENVIAR CONFIRMACIÓN
+                    </button>
+                </form>
+
+                <p id="rsvpNote" class="text-xs text-gray-500 mt-4">Se abrirá tu app de correo para enviar la confirmación.</p>
+            </div>
+        </div>
+
+        <!-- ESCENA 7: Despedida -->
+        <div id="scene7" class="scene">
+            <div class="slow-zoom">
+                <h2 class="font-bold-title fs-title text-pink-panther mb-4">¡NO FALTES!</h2>
+                <p class="fs-body font-light text-gray-300">Ven con tu mejor actitud de detective.</p>
+                <div class="mt-8 opacity-50">
+                    <svg class="w-12 h-12 mx-auto text-pink-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/></svg>
+                </div>
+                <p class="text-xs text-gray-500 mt-8">Fin de la transmisión.</p>
+                <button id="replayBtn" class="mt-6 px-5 py-2 rounded-full border border-pink-500 text-pink-400 text-sm tracking-widest hover:bg-pink-500 hover:text-white transition-colors">
+                    VER DE NUEVO
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const PARENT_EMAIL = "diaztorreschristiandavid@gmail.com";
+
+        // ---------- AUDIO: TEMA DE MISIÓN IMPOSIBLE ----------
+        let bassSeq, melodySeq;
+
+        async function playMissionImpossibleTheme() {
+            await Tone.start();
+            Tone.Transport.bpm.value = 160;
+
+            const bassSynth = new Tone.Synth({
+                oscillator: { type: "triangle" },
+                envelope: { attack: 0.01, decay: 0.15, sustain: 0.05, release: 0.2 }
+            }).toDestination();
+            bassSynth.volume.value = -3;
+
+            const melodySynth = new Tone.Synth({
+                oscillator: { type: "square" },
+                envelope: { attack: 0.01, decay: 0.1, sustain: 0.15, release: 0.3 }
+            }).toDestination();
+            melodySynth.volume.value = -9;
+
+            const bassNotes = [
+                "G2", null, null, "G2", null, null, "Bb2", null, "C3", null,
+                "G2", null, null, "G2", null, null, "F2", null, "F#2", null
+            ];
+
+            const melodyNotes = [
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null,
+                "G4", null, null, null, null, null, "Bb4", null, "D5", null,
+                "G4", null, null, null, null, null, "Bb4", null, "Db5", null
+            ];
+
+            bassSeq = new Tone.Sequence((time, note) => {
+                if (note) bassSynth.triggerAttackRelease(note, "16n", time);
+            }, bassNotes, "16n");
+            bassSeq.loop = true;
+
+            melodySeq = new Tone.Sequence((time, note) => {
+                if (note) melodySynth.triggerAttackRelease(note, note === "G4" ? "8n" : "16n", time);
+            }, melodyNotes, "16n");
+            melodySeq.loop = true;
+
+            bassSeq.start(0);
+            melodySeq.start(0);
+            Tone.Transport.start();
+        }
+
+        function stopMissionImpossibleTheme() {
+            try {
+                if (bassSeq) bassSeq.stop();
+                if (melodySeq) melodySeq.stop();
+                Tone.Transport.stop();
+                Tone.Transport.cancel();
+            } catch (e) { /* noop */ }
+        }
+
+        // ---------- CANVAS: HUELLAS DE FONDO ----------
+        const canvas = document.getElementById('pawsCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.querySelector('.invitation-container');
+
+        function resizeCanvas() {
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function drawPaw(x, y, rotation, scale, opacity) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(rotation);
+            ctx.scale(scale, scale);
+            ctx.globalAlpha = opacity;
+            ctx.fillStyle = '#ec4899';
+
+            ctx.beginPath(); ctx.ellipse(0, 0, 15, 12, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(-12, -15, 6, 8, -0.3, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(0, -20, 6, 9, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.ellipse(12, -15, 6, 8, 0.3, 0, Math.PI * 2); ctx.fill();
+
+            ctx.restore();
+        }
+
+        let paws = [];
+        let footprintInterval = null;
+        let animationFrameId = null;
+        let lastX = 0, lastY = 0, isLeftFoot = true;
+
+        function resetFootprintOrigin() {
+            lastX = canvas.width / 2;
+            lastY = canvas.height + 50;
+        }
+
+        function spawnFootprint() {
+            lastY -= (Math.random() * 20 + 40);
+            lastX += (isLeftFoot ? -25 : 25) + (Math.random() * 10 - 5);
+
+            if (lastY < -50) {
+                lastY = canvas.height + 50;
+                lastX = Math.random() * canvas.width;
+            }
+
+            paws.push({
+                x: lastX, y: lastY,
+                rotation: isLeftFoot ? -0.2 : 0.2,
+                scale: Math.random() * 0.4 + 0.8,
+                opacity: 0, life: 0, maxLife: 200
+            });
+            isLeftFoot = !isLeftFoot;
+        }
+
+        function animateCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = 'rgba(255,255,255,0.02)';
+            for (let i = 0; i < 30; i++) {
+                ctx.beginPath();
+                ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            for (let i = paws.length - 1; i >= 0; i--) {
+                let p = paws[i];
+                p.life++;
+                if (p.life < 20) p.opacity += 0.05;
+                else if (p.life > p.maxLife - 50) p.opacity -= 0.02;
+
+                let currentOpacity = Math.max(0, Math.min(p.opacity, 0.15));
+                if (currentOpacity > 0) drawPaw(p.x, p.y, p.rotation, p.scale, currentOpacity);
+
+                if (p.life >= p.maxLife) paws.splice(i, 1);
+            }
+
+            animationFrameId = requestAnimationFrame(animateCanvas);
+        }
+
+        // ---------- TIMELINE ----------
+        const AUTO_TIMELINE = [
+            { time: 0,     scene: 'scene1' },
+            { time: 9000,  scene: 'scene2' },
+            { time: 22000, scene: 'scene3' },
+            { time: 34000, scene: 'scene4' },
+            { time: 46000, scene: 'scene5' },
+            { time: 58000, scene: 'scene6' }
+        ];
+        const RSVP_TIME = 58000;
+
+        let currentActiveScene = null;
+        let videoInterval = null;
+
+        function showScene(id) {
+            document.querySelectorAll('.scene').forEach(el => el.classList.remove('active'));
+            const el = document.getElementById(id);
+            if (el) el.classList.add('active');
+            currentActiveScene = id;
+        }
+
+        function resetExperience() {
+            clearInterval(videoInterval);
+            clearInterval(footprintInterval);
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            stopMissionImpossibleTheme();
+
+            paws = [];
+            currentActiveScene = null;
+            document.querySelectorAll('.scene').forEach(el => el.classList.remove('active'));
+            document.getElementById('rsvpForm').reset();
+
+            document.getElementById('progressBar').style.width = '0%';
+            document.getElementById('progressBarContainer').classList.add('hidden');
+
+            const startScreen = document.getElementById('startScreen');
+            startScreen.style.display = 'flex';
+            requestAnimationFrame(() => { startScreen.style.opacity = '1'; });
+        }
+
+        function startVideo() {
+            const startScreen = document.getElementById('startScreen');
+            startScreen.style.opacity = '0';
+            setTimeout(() => { startScreen.style.display = 'none'; }, 1000);
+
+            playMissionImpossibleTheme().catch(() => {
+                console.warn("El audio no pudo iniciarse en este navegador.");
+            });
+
+            const progressContainer = document.getElementById('progressBarContainer');
+            progressContainer.classList.remove('hidden');
+            const progressBar = document.getElementById('progressBar');
+
+            resetFootprintOrigin();
+            animateCanvas();
+            footprintInterval = setInterval(spawnFootprint, 800);
+
+            showScene('scene1');
+            let startTime = Date.now();
+
+            videoInterval = setInterval(() => {
+                let elapsed = Date.now() - startTime;
+
+                let progressPercent = Math.min((elapsed / RSVP_TIME) * 100, 100);
+                progressBar.style.width = progressPercent + '%';
+
+                let activeConfig = [...AUTO_TIMELINE].reverse().find(t => elapsed >= t.time);
+                if (activeConfig && currentActiveScene !== activeConfig.scene) {
+                    showScene(activeConfig.scene);
+                }
+
+                if (elapsed >= RSVP_TIME) {
+                    clearInterval(videoInterval);
+                }
+            }, 100);
+        }
+
+        function buildMailto() {
+            const name = document.getElementById('guestName').value || "(sin nombre)";
+            const attending = document.getElementById('guestAttending').value;
+            const count = document.getElementById('guestCount').value || "0";
+            const message = document.getElementById('guestMessage').value || "(sin mensaje)";
+
+            const subject = `Confirmación cumpleaños Evan David - ${name}`;
+            const body =
+                `Nombre: ${name}\n` +
+                `Respuesta: ${attending}\n` +
+                `Acompañantes adicionales: ${count}\n` +
+                `Mensaje: ${message}\n\n` +
+                // CORRECCIÓN: 6 años en lugar de 9
+                `Evento: Cumpleaños de Evan David Díaz Patiño (6 años)\n` +
+                `Fecha de celebración: 8 de noviembre de 2026, 2:00 PM\n` +
+                `Lugar: Carrera 13 # 32F - 19 Sur, Bogotá`;
+
+            return `mailto:${PARENT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        }
+
+        document.getElementById('rsvpForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            window.location.href = buildMailto();
+            clearInterval(footprintInterval);
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            stopMissionImpossibleTheme();
+            document.getElementById('progressBarContainer').classList.add('hidden');
+            showScene('scene7');
+        });
+
+        document.getElementById('startScreen').addEventListener('click', startVideo);
+        document.getElementById('replayBtn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            resetExperience();
+        });
+    </script>
+</body>
+</html>
