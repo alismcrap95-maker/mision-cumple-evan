@@ -59,9 +59,76 @@
         .fs-body     { font-size: clamp(0.95rem, 4.2vw, 1.2rem); }
         .fs-mystery  { font-size: clamp(1.4rem, 6vw, 2rem); }
 
-        @keyframes scan { 0% { transform: translateY(-100%); } 100% { transform: translateY(400%); } }
+        /* ---------- NUEVAS ANIMACIONES DE MISTERIO ---------- */
+        
+        /* 1. Láser Escáner */
+        @keyframes laserScan {
+            0% { top: 0; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+        .animate-laser { animation: laserScan 2s ease-in-out infinite; }
 
-        /* ANIMACIONES DE EXPLOSIÓN Y VIDRIO ROTO */
+        /* 2. Efecto Glitch (Hacker) */
+        .glitch-text {
+            position: relative;
+            animation: glitch-skew 1s infinite linear alternate-reverse;
+        }
+        .glitch-text::before, .glitch-text::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+        }
+        .glitch-text::before {
+            left: 2px; text-shadow: -2px 0 red;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim 5s infinite linear alternate-reverse;
+        }
+        .glitch-text::after {
+            left: -2px; text-shadow: -2px 0 blue;
+            clip: rect(44px, 450px, 56px, 0);
+            animation: glitch-anim2 5s infinite linear alternate-reverse;
+        }
+        @keyframes glitch-anim {
+            0% { clip: rect(12px, 9999px, 59px, 0); }
+            20% { clip: rect(65px, 9999px, 12px, 0); }
+            40% { clip: rect(43px, 9999px, 28px, 0); }
+            60% { clip: rect(89px, 9999px, 73px, 0); }
+            80% { clip: rect(22px, 9999px, 4px, 0); }
+            100% { clip: rect(31px, 9999px, 92px, 0); }
+        }
+        @keyframes glitch-anim2 {
+            0% { clip: rect(29px, 9999px, 81px, 0); }
+            20% { clip: rect(14px, 9999px, 63px, 0); }
+            40% { clip: rect(78px, 9999px, 33px, 0); }
+            60% { clip: rect(52px, 9999px, 19px, 0); }
+            80% { clip: rect(9px, 9999px, 54px, 0); }
+            100% { clip: rect(86px, 9999px, 27px, 0); }
+        }
+
+        /* 3. Sello de Acceso */
+        @keyframes stampSlam {
+            0% { transform: scale(4) rotate(-15deg); opacity: 0; }
+            70% { transform: scale(1.1) rotate(-15deg); opacity: 1; }
+            100% { transform: scale(1) rotate(-15deg); opacity: 0.9; }
+        }
+        .animate-stamp {
+            display: flex !important;
+            animation: stampSlam 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* 4. Radar Sweep */
+        .radar-bg {
+            background: radial-gradient(circle, rgba(236,72,153,0.1) 0%, rgba(0,0,0,0) 70%);
+        }
+        .radar-sweep {
+            background: conic-gradient(from 0deg, transparent 70%, rgba(236, 72, 153, 0.5) 100%);
+            animation: spin 3s linear infinite;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* ---------- ANIMACIONES DE EXPLOSIÓN Y VIDRIO ROTO ---------- */
         @keyframes screenShake {
             0% { transform: translate(1px, 1px) rotate(0deg); }
             10% { transform: translate(-3px, -4px) rotate(-1deg); }
@@ -75,9 +142,7 @@
             90% { transform: translate(3px, 4px) rotate(0deg); }
             100% { transform: translate(2px, -4px) rotate(-1deg); }
         }
-        .is-shaking {
-            animation: screenShake 0.4s infinite;
-        }
+        .is-shaking { animation: screenShake 0.4s infinite; }
 
         @keyframes flashBang {
             0% { background-color: transparent; }
@@ -86,36 +151,26 @@
             40% { background-color: #ff0000; }
             100% { background-color: #000000; }
         }
-        .explode-effect {
-            display: flex !important;
-            animation: flashBang 1.5s forwards;
-        }
+        .explode-effect { display: flex !important; animation: flashBang 1.5s forwards; }
 
         @keyframes shatterGlass {
             0% { transform: scale(1.5); opacity: 0; }
             50% { transform: scale(0.95); opacity: 1; }
             100% { transform: scale(1); opacity: 1; }
         }
-        .animate-shatter {
-            display: block !important;
-            animation: shatterGlass 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
+        .animate-shatter { display: block !important; animation: shatterGlass 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 
-        /* DISEÑO DE LA MECHA */
+        /* ---------- DISEÑO DE LA MECHA ---------- */
         .fuse-container {
             background: repeating-linear-gradient(45deg, #b45309, #b45309 4px, #92400e 4px, #92400e 8px);
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.6);
-            border: 1px solid #78350f;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.6); border: 1px solid #78350f;
         }
         .fuse-burnt { background-color: #111827; }
         .spark {
-            width: 24px;
-            height: 24px;
+            width: 24px; height: 24px;
             background: radial-gradient(circle, #ffffff 10%, #ffea00 30%, #ff5e00 60%, transparent 100%);
-            border-radius: 50%;
-            box-shadow: 0 0 15px #ff5e00, 0 0 25px #ff0000;
-            animation: sparkFlicker 0.1s infinite alternate;
-            pointer-events: none;
+            border-radius: 50%; box-shadow: 0 0 15px #ff5e00, 0 0 25px #ff0000;
+            animation: sparkFlicker 0.1s infinite alternate; pointer-events: none;
         }
         @keyframes sparkFlicker {
             0% { transform: scale(0.8) translate(1px, -1px); opacity: 0.9; }
@@ -132,7 +187,6 @@
         
         <!-- PANTALLA DE DESTRUCCIÓN SUPERPUESTA -->
         <div id="explosionOverlay" class="absolute inset-0 z-[100] hidden flex-col items-center justify-center pointer-events-none">
-            
             <!-- SVG Vidrio Roto -->
             <svg id="brokenGlass" class="absolute inset-0 w-full h-full pointer-events-none hidden z-[105]" style="filter: drop-shadow(2px 5px 4px rgba(0,0,0,0.9));" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none">
                 <g stroke="rgba(255, 255, 255, 0.85)" stroke-width="0.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -144,23 +198,25 @@
                     <polygon points="50,50 85,0 100,45" fill="rgba(255,255,255,0.2)"/>
                     <polygon points="50,50 75,100 20,100" fill="rgba(255,255,255,0.1)"/>
                     <polygon points="50,50 0,60 5,5" fill="rgba(255,255,255,0.25)"/>
-                    <polygon points="40,30 55,15 70,30" fill="rgba(255,255,255,0.12)"/>
-                    <polygon points="25,50 15,45 0,60" fill="rgba(255,255,255,0.18)"/>
                 </g>
             </svg>
-
             <p id="destructText" class="font-bold-title text-4xl text-white tracking-widest opacity-0 transition-all duration-1000 mt-10 z-[110] drop-shadow-[0_0_10px_rgba(255,0,0,0.8)] scale-90">MENSAJE DESTRUIDO</p>
         </div>
 
         <canvas id="pawsCanvas" class="absolute inset-0 z-0"></canvas>
 
-        <!-- PANTALLA DE INICIO -->
+        <!-- PANTALLA DE INICIO (NUEVO ESCÁNER BIOMÉTRICO) -->
         <div id="startScreen" class="absolute inset-0 z-50 bg-gray-900 flex flex-col items-center justify-center cursor-pointer transition-opacity duration-1000">
-            <div class="w-24 h-24 rounded-full border-4 border-pink-500 flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(236,72,153,0.4)] hover:scale-110 transition-transform bg-gray-800">
-                <div class="w-0 h-0 border-t-[18px] border-t-transparent border-l-[30px] border-l-pink-500 border-b-[18px] border-b-transparent ml-3"></div>
+            <div class="relative w-32 h-32 rounded-3xl border-2 border-pink-500/50 flex items-center justify-center mb-8 bg-gray-800 overflow-hidden shadow-[0_0_30px_rgba(236,72,153,0.3)] hover:border-pink-500 transition-colors">
+                <!-- Línea de escaneo láser -->
+                <div class="absolute left-0 w-full h-[2px] bg-pink-400 shadow-[0_0_15px_rgba(236,72,153,1)] z-10 animate-laser"></div>
+                <!-- Icono de huella -->
+                <svg class="w-20 h-20 text-pink-500 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                </svg>
             </div>
-            <h2 class="font-bold-title text-3xl text-white tracking-widest">INICIAR MISIÓN</h2>
-            <p class="text-sm text-gray-400 mt-2 font-light tracking-widest">ENCRIPTACIÓN NIVEL 6</p>
+            <h2 class="font-bold-title text-3xl text-white tracking-widest text-center leading-tight">ESCANEAR HUELLA<br>PARA INICIAR</h2>
+            <p class="text-sm text-gray-500 mt-4 font-light tracking-widest animate-pulse">ENCRIPTACIÓN NIVEL 6</p>
         </div>
 
         <!-- BARRA DE PROGRESO (LA MECHA) -->
@@ -179,26 +235,32 @@
             </div>
         </div>
 
-        <!-- ESCENA 2: Nombre y Foto -->
+        <!-- ESCENA 2: Nombre, Foto y Sello Clasificado -->
         <div id="scene2" class="scene">
-            <div class="slow-zoom">
-                <!-- NOMBRE EN UN SOLO TONO -->
-                <h1 class="font-bold-title text-white mb-2 leading-tight flex flex-col gap-1">
-                    <span class="text-xl md:text-2xl text-gray-300">AGENTE</span>
-                    <span class="text-pink-panther fs-title block leading-none">EVAN DAVID DÍAZ PATIÑO</span>
-                </h1>
-
-                <!-- CONTENEDOR DE LA FOTO -->
-                <div class="relative mt-4 mb-4 transform -rotate-2 bg-gray-800/60 p-2 border border-pink-500/30 rounded-xl">
-                    <img src="foto_evan.jpg" alt="Foto del Agente" class="w-32 h-32 object-cover rounded-lg border-2 border-pink-500 shadow-[0_0_15px_rgba(236,72,153,0.4)] grayscale opacity-90 transition-all duration-1000" id="agenteFoto">
-                    <div class="absolute -bottom-2 -right-4 transform -rotate-12 border-4 border-red-600 text-red-600 font-bold-title text-lg px-2 py-1 rounded shadow-md opacity-90 bg-black/80">
-                        CONFIDENCIAL
+            <div class="slow-zoom relative">
+                
+                <!-- SELLO CLASIFICADO (Aparece cuando la foto pasa a color) -->
+                <div id="authStamp" class="absolute inset-0 z-30 hidden items-center justify-center pointer-events-none">
+                    <div class="border-4 border-red-600 text-red-600 font-bold-title text-4xl px-4 py-2 bg-black/40 backdrop-blur-sm rounded shadow-[0_0_20px_rgba(220,38,38,0.5)]">
+                        ACCESO AUTORIZADO
                     </div>
                 </div>
 
-                <div class="bg-gray-800 border-l-4 border-pink-500 px-4 py-2 inline-block shadow-lg mt-2">
-                    <p class="text-sm md:text-base font-medium text-gray-300">Ha completado con éxito su</p>
-                    <p class="font-bold-title fs-subtitle text-pink-panther mt-1">MISIÓN NÚMERO 6</p>
+                <!-- NOMBRE CON EFECTO GLITCH -->
+                <h1 class="font-bold-title text-white mb-2 leading-tight flex flex-col gap-1">
+                    <span class="text-xl md:text-2xl text-gray-400">AGENTE</span>
+                    <span class="text-pink-panther fs-title block leading-none glitch-text" data-text="EVAN DAVID DÍAZ PATIÑO">EVAN DAVID DÍAZ PATIÑO</span>
+                </h1>
+
+                <!-- CONTENEDOR DE LA FOTO -->
+                <div class="relative mt-4 mb-4 bg-gray-800/60 p-2 border border-pink-500/30 rounded-xl">
+                    <img src="foto_evan.jpg" alt="Foto del Agente" class="w-32 h-32 object-cover rounded-lg border-2 border-pink-500 shadow-[0_0_15px_rgba(236,72,153,0.4)] grayscale opacity-90 transition-all duration-1000" id="agenteFoto">
+                </div>
+
+                <div class="bg-gray-800 border-l-4 border-pink-500 px-4 py-2 inline-block shadow-lg mt-2 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-pink-500/10 animate-pulse"></div>
+                    <p class="text-sm md:text-base font-medium text-gray-300 relative z-10">Ha completado con éxito su</p>
+                    <p class="font-bold-title fs-subtitle text-pink-panther mt-1 relative z-10">MISIÓN NÚMERO 6</p>
                 </div>
             </div>
         </div>
@@ -220,7 +282,7 @@
         <!-- ESCENA 4: Fiesta -->
         <div id="scene4" class="scene">
             <div class="slow-zoom bg-gray-800/80 p-6 md:p-8 rounded-2xl border border-gray-700 shadow-2xl w-full">
-                <p class="text-xs md:text-sm uppercase tracking-widest text-pink-500 mb-4">FECHA DE LA OPERACIÓN</p>
+                <p class="text-xs md:text-sm uppercase tracking-widest text-pink-500 mb-4 animate-pulse">FECHA DE LA OPERACIÓN</p>
                 <p class="font-bold-title fs-title text-white mb-2">8 DE NOVIEMBRE</p>
                 <div class="flex items-center justify-center space-x-2 fs-subtitle font-light text-gray-300 my-4">
                     <svg class="w-6 h-6 text-pink-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -230,18 +292,31 @@
             </div>
         </div>
 
-        <!-- ESCENA 5: Dirección -->
+        <!-- ESCENA 5: Dirección con RADAR -->
         <div id="scene5" class="scene">
-            <div class="slow-zoom">
+            <div class="slow-zoom relative w-full flex flex-col items-center">
                 <p class="font-mystery fs-mystery text-pink-panther mb-8">Coordenadas de la Base</p>
-                <div class="bg-gray-900 p-5 md:p-6 rounded-xl border border-pink-500/30 relative overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-b from-transparent via-pink-500/10 to-transparent h-20 -translate-y-20 animate-[scan_3s_ease-in-out_infinite]"></div>
-                    <svg class="w-10 h-10 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                    <p class="font-bold fs-subtitle text-white tracking-wide">CARRERA 13</p>
-                    <p class="font-bold fs-subtitle text-white tracking-wide"># 32F - 19 SUR</p>
-                    <p class="text-xs text-gray-500 mt-1">Bogotá D.C.</p>
+                
+                <div class="bg-gray-900 p-6 rounded-full border-2 border-pink-500/40 relative overflow-hidden w-64 h-64 flex flex-col items-center justify-center shadow-[0_0_20px_rgba(236,72,153,0.2)] radar-bg">
+                    
+                    <!-- Capa del radar giratorio -->
+                    <div class="absolute inset-0 rounded-full radar-sweep"></div>
+                    <!-- Líneas del radar (Círculos concéntricos) -->
+                    <div class="absolute inset-0 rounded-full border border-pink-500/20 m-4"></div>
+                    <div class="absolute inset-0 rounded-full border border-pink-500/20 m-12"></div>
+                    <!-- Cruz central -->
+                    <div class="absolute w-full h-[1px] bg-pink-500/30"></div>
+                    <div class="absolute h-full w-[1px] bg-pink-500/30"></div>
+
+                    <!-- Contenido de las coordenadas -->
+                    <div class="relative z-10 text-center bg-gray-900/80 p-3 rounded-xl backdrop-blur-sm border border-gray-700">
+                        <svg class="w-8 h-8 text-pink-500 mx-auto mb-2 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                        <p class="font-bold fs-body text-white tracking-wide">CARRERA 13</p>
+                        <p class="font-bold fs-body text-white tracking-wide"># 32F - 19 SUR</p>
+                    </div>
                 </div>
-                <a href="https://www.google.com/maps/search/?api=1&query=Carrera+13+%2332F-19+Sur%2C+Bogot%C3%A1%2C+Colombia" target="_blank" rel="noopener noreferrer" class="mt-6 inline-flex items-center gap-2 bg-pink-600 hover:bg-pink-500 transition-colors text-white font-bold-title tracking-wide px-6 py-3 rounded-full shadow-lg">
+
+                <a href="https://www.google.com/maps/search/?api=1&query=Carrera+13+%2332F-19+Sur%2C+Bogot%C3%A1%2C+Colombia" target="_blank" rel="noopener noreferrer" class="mt-8 inline-flex items-center gap-2 bg-pink-600 hover:bg-pink-500 transition-colors text-white font-bold-title tracking-wide px-6 py-3 rounded-full shadow-lg relative z-20">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
                     VER EN GOOGLE MAPS
                 </a>
@@ -255,7 +330,7 @@
                 <p class="text-sm text-gray-300 mb-8 px-4">Serás redirigido a los servidores seguros de la agencia.</p>
 
                 <!-- REEMPLAZA ESTE ENLACE CON EL DE TU GOOGLE FORM -->
-                <a href="https://forms.gle/Rw5MGGPa6g6XCtrU8" 
+                <a href="AQUI_PEGA_EL_LINK_DE_TU_GOOGLE_FORM" 
                    target="_blank" rel="noopener noreferrer"
                    id="btnAbrirForm"
                    class="inline-block bg-pink-600 hover:bg-pink-500 transition-colors text-white font-bold-title tracking-widest px-8 py-4 rounded-full shadow-[0_0_20px_rgba(236,72,153,0.5)]">
@@ -312,12 +387,10 @@
             ctx.scale(scale, scale);
             ctx.globalAlpha = opacity;
             ctx.fillStyle = '#ec4899';
-
             ctx.beginPath(); ctx.ellipse(0, 0, 15, 12, 0, 0, Math.PI * 2); ctx.fill();
             ctx.beginPath(); ctx.ellipse(-12, -15, 6, 8, -0.3, 0, Math.PI * 2); ctx.fill();
             ctx.beginPath(); ctx.ellipse(0, -20, 6, 9, 0, 0, Math.PI * 2); ctx.fill();
             ctx.beginPath(); ctx.ellipse(12, -15, 6, 8, 0.3, 0, Math.PI * 2); ctx.fill();
-
             ctx.restore();
         }
 
@@ -334,12 +407,10 @@
         function spawnFootprint() {
             lastY -= (Math.random() * 20 + 40);
             lastX += (isLeftFoot ? -25 : 25) + (Math.random() * 10 - 5);
-
             if (lastY < -50) {
                 lastY = canvas.height + 50;
                 lastX = Math.random() * canvas.width;
             }
-
             paws.push({ x: lastX, y: lastY, rotation: isLeftFoot ? -0.2 : 0.2, scale: Math.random() * 0.4 + 0.8, opacity: 0, life: 0, maxLife: 200 });
             isLeftFoot = !isLeftFoot;
         }
@@ -352,13 +423,11 @@
                 ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 2, 0, Math.PI * 2);
                 ctx.fill();
             }
-
             for (let i = paws.length - 1; i >= 0; i--) {
                 let p = paws[i];
                 p.life++;
                 if (p.life < 20) p.opacity += 0.05;
                 else if (p.life > p.maxLife - 50) p.opacity -= 0.02;
-
                 let currentOpacity = Math.max(0, Math.min(p.opacity, 0.15));
                 if (currentOpacity > 0) drawPaw(p.x, p.y, p.rotation, p.scale, currentOpacity);
                 if (p.life >= p.maxLife) paws.splice(i, 1);
@@ -369,7 +438,15 @@
         // ---------- TIMELINE ----------
         const AUTO_TIMELINE = [
             { time: 0,     scene: 'scene1' },
-            { time: 9000,  scene: 'scene2', action: () => document.getElementById('agenteFoto').classList.remove('grayscale') },
+            { time: 9000,  scene: 'scene2', action: () => {
+                document.getElementById('agenteFoto').classList.remove('grayscale');
+                // Agregar el sello con un pequeñísimo retraso para impacto
+                setTimeout(() => {
+                    const stamp = document.getElementById('authStamp');
+                    stamp.classList.remove('hidden');
+                    stamp.classList.add('animate-stamp');
+                }, 400);
+            }},
             { time: 22000, scene: 'scene3' },
             { time: 34000, scene: 'scene4' },
             { time: 46000, scene: 'scene5' },
@@ -398,7 +475,12 @@
             paws = [];
             currentActiveScene = null;
             document.querySelectorAll('.scene').forEach(el => el.classList.remove('active'));
+            
+            // Reset Foto y Sello
             document.getElementById('agenteFoto').classList.add('grayscale');
+            const stamp = document.getElementById('authStamp');
+            stamp.classList.add('hidden');
+            stamp.classList.remove('animate-stamp');
 
             document.getElementById('progressBar').style.width = '0%';
             document.getElementById('progressBarContainer').classList.add('hidden');
@@ -494,7 +576,7 @@
                     overlay.classList.add('explode-effect');
                     audioEl.pause(); 
                     
-                    // Mostrar vidrio roto justo cuando el destello alcanza su punto máximo
+                    // Mostrar vidrio roto
                     setTimeout(() => {
                         brokenGlass.classList.remove('hidden');
                         brokenGlass.classList.add('animate-shatter');
@@ -506,7 +588,6 @@
                         textDestruct.style.transform = 'scale(1)';
                     }, 800);
                     
-                    // Opcional: Reiniciar tras unos segundos
                     setTimeout(() => {
                         resetExperience();
                     }, 6000);
