@@ -59,7 +59,7 @@
         .fs-body     { font-size: clamp(0.95rem, 4.2vw, 1.2rem); }
         .fs-mystery  { font-size: clamp(1.4rem, 6vw, 2rem); }
 
-        /* ---------- NUEVAS ANIMACIONES DE MISTERIO ---------- */
+        /* ---------- ANIMACIONES DE MISTERIO ---------- */
         
         /* 1. Láser Escáner */
         @keyframes laserScan {
@@ -109,9 +109,9 @@
 
         /* 3. Sello de Acceso */
         @keyframes stampSlam {
-            0% { transform: scale(4) rotate(-15deg); opacity: 0; }
-            70% { transform: scale(1.1) rotate(-15deg); opacity: 1; }
-            100% { transform: scale(1) rotate(-15deg); opacity: 0.9; }
+            0% { transform: scale(4) rotate(-5deg); opacity: 0; }
+            70% { transform: scale(1.1) rotate(-5deg); opacity: 1; }
+            100% { transform: scale(1) rotate(-5deg); opacity: 0.95; }
         }
         .animate-stamp {
             display: flex !important;
@@ -205,18 +205,18 @@
 
         <canvas id="pawsCanvas" class="absolute inset-0 z-0"></canvas>
 
-        <!-- PANTALLA DE INICIO (NUEVO ESCÁNER BIOMÉTRICO) -->
+        <!-- PANTALLA DE INICIO (HUELLA PULSANTE) -->
         <div id="startScreen" class="absolute inset-0 z-50 bg-gray-900 flex flex-col items-center justify-center cursor-pointer transition-opacity duration-1000">
-            <div class="relative w-32 h-32 rounded-3xl border-2 border-pink-500/50 flex items-center justify-center mb-8 bg-gray-800 overflow-hidden shadow-[0_0_30px_rgba(236,72,153,0.3)] hover:border-pink-500 transition-colors">
+            <div class="relative w-32 h-32 rounded-3xl border-2 border-pink-500/50 flex items-center justify-center mb-8 bg-gray-800 overflow-hidden shadow-[0_0_30px_rgba(236,72,153,0.3)] hover:border-pink-500 transition-colors cursor-pointer animate-pulse">
                 <!-- Línea de escaneo láser -->
                 <div class="absolute left-0 w-full h-[2px] bg-pink-400 shadow-[0_0_15px_rgba(236,72,153,1)] z-10 animate-laser"></div>
                 <!-- Icono de huella -->
-                <svg class="w-20 h-20 text-pink-500 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                <svg class="w-20 h-20 text-pink-500 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
                 </svg>
             </div>
-            <h2 class="font-bold-title text-3xl text-white tracking-widest text-center leading-tight">ESCANEAR HUELLA<br>PARA INICIAR</h2>
-            <p class="text-sm text-gray-500 mt-4 font-light tracking-widest animate-pulse">ENCRIPTACIÓN NIVEL 6</p>
+            <h2 class="font-bold-title text-4xl text-pink-500 tracking-widest text-center leading-tight mb-2 drop-shadow-[0_0_10px_rgba(236,72,153,0.5)]">COLOCA TU DEDO<br>AQUÍ</h2>
+            <p class="text-sm text-gray-400 mt-2 font-light tracking-widest">ENCRIPTACIÓN NIVEL 6</p>
         </div>
 
         <!-- BARRA DE PROGRESO (LA MECHA) -->
@@ -235,29 +235,29 @@
             </div>
         </div>
 
-        <!-- ESCENA 2: Nombre, Foto y Sello Clasificado -->
+        <!-- ESCENA 2: Nombre, Foto Grande y Sello Inferior -->
         <div id="scene2" class="scene">
-            <div class="slow-zoom relative">
+            <div class="slow-zoom relative w-full flex flex-col items-center">
                 
-                <!-- SELLO CLASIFICADO (Aparece cuando la foto pasa a color) -->
-                <div id="authStamp" class="absolute inset-0 z-30 hidden items-center justify-center pointer-events-none">
-                    <div class="border-4 border-red-600 text-red-600 font-bold-title text-4xl px-4 py-2 bg-black/40 backdrop-blur-sm rounded shadow-[0_0_20px_rgba(220,38,38,0.5)]">
-                        ACCESO AUTORIZADO
-                    </div>
-                </div>
-
                 <!-- NOMBRE CON EFECTO GLITCH -->
-                <h1 class="font-bold-title text-white mb-2 leading-tight flex flex-col gap-1">
+                <h1 class="font-bold-title text-white mb-2 leading-tight flex flex-col gap-1 text-center">
                     <span class="text-xl md:text-2xl text-gray-400">AGENTE</span>
                     <span class="text-pink-panther fs-title block leading-none glitch-text" data-text="EVAN DAVID DÍAZ PATIÑO">EVAN DAVID DÍAZ PATIÑO</span>
                 </h1>
 
-                <!-- CONTENEDOR DE LA FOTO -->
-                <div class="relative mt-4 mb-4 bg-gray-800/60 p-2 border border-pink-500/30 rounded-xl">
-                    <img src="foto_evan.jpg" alt="Foto del Agente" class="w-32 h-32 object-cover rounded-lg border-2 border-pink-500 shadow-[0_0_15px_rgba(236,72,153,0.4)] grayscale opacity-90 transition-all duration-1000" id="agenteFoto">
+                <!-- CONTENEDOR DE LA FOTO (MUCHO MÁS GRANDE) -->
+                <div class="relative mt-4 mb-4 bg-gray-800/60 p-2 border border-pink-500/30 rounded-2xl w-56 h-56 md:w-64 md:h-64 flex-shrink-0">
+                    <img src="foto_evan.jpg" alt="Foto del Agente" class="w-full h-full object-cover rounded-xl border-2 border-pink-500 shadow-[0_0_15px_rgba(236,72,153,0.4)] grayscale opacity-90 transition-all duration-1000" id="agenteFoto">
+                    
+                    <!-- SELLO CLASIFICADO (Aparece al fondo de la foto) -->
+                    <div id="authStamp" class="absolute -bottom-6 left-0 right-0 z-30 hidden flex justify-center pointer-events-none">
+                        <div class="border-4 border-red-600 text-red-600 font-bold-title text-2xl md:text-3xl px-6 py-1 bg-black/80 backdrop-blur-md rounded shadow-[0_0_20px_rgba(220,38,38,0.7)]">
+                            ACCESO AUTORIZADO
+                        </div>
+                    </div>
                 </div>
 
-                <div class="bg-gray-800 border-l-4 border-pink-500 px-4 py-2 inline-block shadow-lg mt-2 relative overflow-hidden">
+                <div class="bg-gray-800 border-l-4 border-pink-500 px-4 py-2 inline-block shadow-lg mt-8 relative overflow-hidden text-center">
                     <div class="absolute inset-0 bg-pink-500/10 animate-pulse"></div>
                     <p class="text-sm md:text-base font-medium text-gray-300 relative z-10">Ha completado con éxito su</p>
                     <p class="font-bold-title fs-subtitle text-pink-panther mt-1 relative z-10">MISIÓN NÚMERO 6</p>
@@ -299,16 +299,12 @@
                 
                 <div class="bg-gray-900 p-6 rounded-full border-2 border-pink-500/40 relative overflow-hidden w-64 h-64 flex flex-col items-center justify-center shadow-[0_0_20px_rgba(236,72,153,0.2)] radar-bg">
                     
-                    <!-- Capa del radar giratorio -->
                     <div class="absolute inset-0 rounded-full radar-sweep"></div>
-                    <!-- Líneas del radar (Círculos concéntricos) -->
                     <div class="absolute inset-0 rounded-full border border-pink-500/20 m-4"></div>
                     <div class="absolute inset-0 rounded-full border border-pink-500/20 m-12"></div>
-                    <!-- Cruz central -->
                     <div class="absolute w-full h-[1px] bg-pink-500/30"></div>
                     <div class="absolute h-full w-[1px] bg-pink-500/30"></div>
 
-                    <!-- Contenido de las coordenadas -->
                     <div class="relative z-10 text-center bg-gray-900/80 p-3 rounded-xl backdrop-blur-sm border border-gray-700">
                         <svg class="w-8 h-8 text-pink-500 mx-auto mb-2 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                         <p class="font-bold fs-body text-white tracking-wide">CARRERA 13</p>
@@ -440,7 +436,6 @@
             { time: 0,     scene: 'scene1' },
             { time: 9000,  scene: 'scene2', action: () => {
                 document.getElementById('agenteFoto').classList.remove('grayscale');
-                // Agregar el sello con un pequeñísimo retraso para impacto
                 setTimeout(() => {
                     const stamp = document.getElementById('authStamp');
                     stamp.classList.remove('hidden');
